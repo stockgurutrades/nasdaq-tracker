@@ -13,22 +13,30 @@ nasdaq_tickers = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "TSLA", "META", "AMD"
 
 
 def get_stock_data(tickers):
-    data = yf.download(tickers, period="1d", interval="1d")['Adj Close']
-    prev_close = yf.download(tickers, period="2d", interval="1d")['Adj Close'].iloc[0]
-    
+    batch_size = 20  # Fetch stocks in batches to avoid request limits
     stock_list = []
-    for ticker in tickers:
+
+    for i in range(0, len(tickers), batch_size):
+        batch = tickers[i:i + batch_size]
         try:
-            stock = yf.Ticker(ticker)
-            market_cap = stock.info.get("marketCap", 0)  # Default to 0 if missing
-            daily_change = ((data[ticker] - prev_close[ticker]) / prev_close[ticker]) * 100
-            direction = "Green" if daily_change > 0 else "Red"
-            
-            stock_list.append({"Ticker": ticker, "Market Cap": market_cap, 
-                               "Price": data[ticker], "Daily Change (%)": daily_change, "Direction": direction})
+            data = yf.download(batch, period="1d", interval="1d")['Adj Close']
+            prev_close = yf.download(batch, period="2d", interval="1d")['Adj Close'].iloc[0]
         except Exception as e:
-            print(f"Error fetching data for {ticker}: {e}")
-    
+            print(f"Error fetching batch {batch}: {e}")
+            continue
+
+        for ticker in batch:
+            try:
+                stock = yf.Ticker(ticker)
+                market_cap = stock.info.get("marketCap", 0)  # Default to 0 if missing
+                if ticker in data and ticker in prev_close:
+                    daily_change = ((data[ticker] - prev_close[ticker]) / prev_close[ticker]) * 100
+                    direction = "Green" if daily_change > 0 else "Red"
+                    stock_list.append({"Ticker": ticker, "Market Cap": market_cap, 
+                                       "Price": data[ticker], "Daily Change (%)": daily_change, "Direction": direction})
+            except Exception as e:
+                print(f"Error fetching data for {ticker}: {e}")
+
     return pd.DataFrame(stock_list)
 
 # Streamlit UI
