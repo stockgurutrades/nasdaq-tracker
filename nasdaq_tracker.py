@@ -2,6 +2,7 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
+import time
 
 # Define NASDAQ tickers (Example: Add more stocks as needed)
 nasdaq_tickers = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "TSLA", "META", "AMD", "NFLX", "INTC","ADBE", "PYPL", "CSCO", "PEP", "AVGO", "TXN", "COST", "QCOM", "HON", "SBUX",
@@ -13,35 +14,27 @@ nasdaq_tickers = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "TSLA", "META", "AMD"
 
 
 def get_stock_data(tickers):
-    batch_size = 20  # Fetch stocks in batches to avoid request limits
     stock_list = []
-
-    for i in range(0, len(tickers), batch_size):
-        batch = tickers[i:i + batch_size]
+    for ticker in tickers:
         try:
-            data = yf.download(batch, period="5d", interval="1d")["Adj Close"].ffill()
-            prev_close = data.shift(1).iloc[-1]  # Get previous close even if the market is closed
-            if data.empty:
-                print(f"No data returned for batch: {batch}")
+            stock = yf.Ticker(ticker)
+            hist = stock.history(period="5d")  # Fetch last 5 days of history
+            if hist.empty:
+                print(f"No data for {ticker}, skipping.")
                 continue
-        except Exception as e:
-            print(f"Error fetching batch {batch}: {e}")
-            continue
 
-        for ticker in batch:
-            try:
-                stock = yf.Ticker(ticker)
-                market_cap = stock.info.get("marketCap", 0)  # Default to 0 if missing
-                if ticker in data.columns and ticker in prev_close.index and not pd.isna(data[ticker].iloc[-1]):
-                    latest_price = data[ticker].iloc[-1]
-                    daily_change = ((latest_price - prev_close[ticker]) / prev_close[ticker]) * 100
-                    direction = "Green" if daily_change > 0 else "Red"
-                    stock_list.append({"Ticker": ticker, "Market Cap": market_cap, 
-                                       "Price": latest_price, "Daily Change (%)": daily_change, "Direction": direction})
-                else:
-                    print(f"Missing data for {ticker}")
-            except Exception as e:
-                print(f"Error fetching data for {ticker}: {e}")
+            latest_price = hist["Close"].iloc[-1]
+            prev_close = hist["Close"].iloc[-2] if len(hist) > 1 else latest_price
+            daily_change = ((latest_price - prev_close) / prev_close) * 100 if prev_close else 0
+            direction = "Green" if daily_change > 0 else "Red"
+            market_cap = stock.info.get("marketCap", 0)  # Default to 0 if missing
+
+            stock_list.append({"Ticker": ticker, "Market Cap": market_cap,
+                               "Price": latest_price, "Daily Change (%)": daily_change, "Direction": direction})
+            time.sleep(0.5)  # Delay to prevent rate-limiting
+        except Exception as e:
+            print(f"Error fetching data for {ticker}: {e}")
+            continue
 
     return pd.DataFrame(stock_list)
 
@@ -53,7 +46,7 @@ nasdaq_data = get_stock_data(nasdaq_tickers)
 
 # Check if data is empty before proceeding
 if nasdaq_data.empty:
-    st.error("No stock data available. Please try again later. This could be due to Yahoo Finance restrictions.")
+    st.error("No stock data available. Please try again later. Yahoo Finance may be restricting data access.")
 else:
     # Ensure "Direction" column exists before using it
     if "Direction" in nasdaq_data.columns:
