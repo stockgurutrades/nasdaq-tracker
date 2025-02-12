@@ -56,30 +56,25 @@ if nasdaq_data.empty:
 else:
     # Ensure "Direction" column exists before using it
     if "Direction" in nasdaq_data.columns:
-        # Count Green vs Red stocks
-        green_count = len(nasdaq_data[nasdaq_data["Direction"] == "Green"])
-        red_count = len(nasdaq_data[nasdaq_data["Direction"] == "Red"])
-        total_count = len(nasdaq_data)
+        # Split into Green and Red stocks
+        green_stocks = nasdaq_data[nasdaq_data["Direction"] == "Green"]
+        red_stocks = nasdaq_data[nasdaq_data["Direction"] == "Red"]
 
-        green_percentage = (green_count / total_count) * 100
-        red_percentage = (red_count / total_count) * 100
-
-        # Pie Chart Visualization
-        fig, ax = plt.subplots()
-        ax.pie([green_count, red_count], labels=["Green", "Red"], autopct="%1.1f%%", colors=["green", "red"])
-        ax.set_title("NASDAQ: Green vs Red Stocks")
+        # Pie Chart Visualization (Enhanced Look)
+        fig, ax = plt.subplots(figsize=(6, 6))
+        ax.pie([len(green_stocks), len(red_stocks)], labels=["Green", "Red"], autopct="%1.1f%%", colors=["limegreen", "red"],
+               startangle=90, wedgeprops={"edgecolor": "black", "linewidth": 1.5})
+        ax.set_title("NASDAQ: Green vs Red Stocks", fontsize=14, fontweight='bold')
         st.pyplot(fig)
 
-        # Sorting Options
-        sort_option = st.selectbox("Sort stocks by:", ["Market Cap", "Daily Change (%)"], index=0)
+        # Display tables
+        st.subheader("Green Stocks")
+        st.dataframe(green_stocks.sort_values(by="Daily Change (%)", ascending=False))
 
-        # Sorting Data
-        if sort_option == "Market Cap":
-            sorted_data = nasdaq_data.sort_values(by="Market Cap", ascending=False)
-        else:
-            sorted_data = nasdaq_data.sort_values(by="Daily Change (%)", ascending=False)
+        st.subheader("Red Stocks")
+        st.dataframe(red_stocks.sort_values(by="Daily Change (%)", ascending=True))
 
-        # Display Data
-        st.dataframe(sorted_data)
+        st.subheader("All Stocks")
+        st.dataframe(nasdaq_data.sort_values(by="Market Cap", ascending=False))
     else:
         st.error("Data error: 'Direction' column is missing.")
