@@ -4,13 +4,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 
-# Define NASDAQ tickers (Example: Add more stocks as needed)
-nasdaq_tickers = ["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "TSLA", "META", "AMD", "NFLX", "INTC","ADBE", "PYPL", "CSCO", "PEP", "AVGO", "TXN", "COST", "QCOM", "HON", "SBUX",
-                  "AMGN", "INTU", "ISRG", "BKNG", "MDLZ", "AMAT", "ADI", "LRCX", "MU", "GILD","ADP", "VRTX", "FISV", "ATVI", "CSX", "MRVL", "KLAC", "MCHP", "ORLY", "NXPI",
-    "KDP", "PANW", "EXC", "MNST", "CTAS", "XEL", "IDXX", "ASML", "TEAM", "WDAY","SNPS", "CDNS", "ANSS", "CTSH", "FAST", "VRSK", "EBAY", "ROST", "PAYX", "PCAR",
-    "SIRI", "WBA", "BIDU", "BIIB", "LULU", "MAR", "MTCH", "CHTR", "SWKS", "ILMN","ALGN", "DOCU", "SGEN", "OKTA", "ZS", "CRWD", "DDOG", "ZM", "PDD", "JD",
-    "BMRN", "MELI", "CPRT", "DLTR", "SPLK", "VRSN", "NTES", "KLAC", "NXPI", "ODFL","ON", "PCAR", "PAYX", "PYPL", "QCOM", "REGN", "ROST", "SBUX", "SGEN", "SIRI",
-    "SNPS", "SPLK", "SWKS", "TEAM", "TMUS", "TSLA", "TXN", "VRSK", "VRSN", "VRTX","WBA", "WDAY", "XEL", "ZM", "ZS"]
+# Define NASDAQ tickers (Updated to match the latest NASDAQ-100 list)
+nasdaq_tickers = ["AAPL", "MSFT", "NVDA", "GOOGL", "GOOG", "AMZN", "TSLA", "META", "AMD", "NFLX", "INTC", "ADBE", "PYPL", "CSCO", "PEP", "AVGO", "TXN", "COST", "QCOM", "HON", "SBUX", 
+                  "AMGN", "INTU", "ISRG", "BKNG", "MDLZ", "AMAT", "ADI", "LRCX", "MU", "GILD", "ADP", "VRTX", "ATVI", "CSX", "MRVL", "KLAC", "MCHP", "ORLY", "NXPI", 
+                  "KDP", "PANW", "EXC", "MNST", "CTAS", "XEL", "IDXX", "ASML", "TEAM", "WDAY", "SNPS", "CDNS", "ANSS", "CTSH", "FAST", "VRSK", "EBAY", "ROST", "PAYX", "PCAR", 
+                  "LULU", "MAR", "CHTR", "ILMN", "ALGN", "SGEN", "OKTA", "CRWD", "DDOG", "MELI", "CPRT", "DLTR", "SPLK", "ODFL", "ON", "REGN", "TMUS", "VRSN", "ZM", "ZS", 
+                  "ABNB", "AEP", "APP", "ARM", "AZN", "ADSK", "AXON", "BKR", "CDW", "CCEP", "CMCSA", "CEG", "CSGP", "DXCM", "FANG", "DASH", "EA", "FTNT", "GEHC", "GFS", 
+                  "KHC", "LIN", "MDB", "MSTR", "PLTR", "ROP", "TTWO", "TTD", "WBD"]
 
 
 def get_stock_data(tickers):
