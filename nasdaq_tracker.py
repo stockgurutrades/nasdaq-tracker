@@ -19,8 +19,11 @@ def get_stock_data(tickers):
     for i in range(0, len(tickers), batch_size):
         batch = tickers[i:i + batch_size]
         try:
-            data = yf.download(batch, period="5d", interval="1d")['Adj Close'].ffill()
+            data = yf.download(batch, period="5d", interval="1d")["Adj Close"].ffill()
             prev_close = data.shift(1).iloc[-1]  # Get previous close even if the market is closed
+            if data.empty:
+                print(f"No data returned for batch: {batch}")
+                continue
         except Exception as e:
             print(f"Error fetching batch {batch}: {e}")
             continue
@@ -29,12 +32,14 @@ def get_stock_data(tickers):
             try:
                 stock = yf.Ticker(ticker)
                 market_cap = stock.info.get("marketCap", 0)  # Default to 0 if missing
-                if ticker in data and ticker in prev_close and not pd.isna(data[ticker].iloc[-1]):
+                if ticker in data.columns and ticker in prev_close.index and not pd.isna(data[ticker].iloc[-1]):
                     latest_price = data[ticker].iloc[-1]
                     daily_change = ((latest_price - prev_close[ticker]) / prev_close[ticker]) * 100
                     direction = "Green" if daily_change > 0 else "Red"
                     stock_list.append({"Ticker": ticker, "Market Cap": market_cap, 
                                        "Price": latest_price, "Daily Change (%)": daily_change, "Direction": direction})
+                else:
+                    print(f"Missing data for {ticker}")
             except Exception as e:
                 print(f"Error fetching data for {ticker}: {e}")
 
@@ -48,7 +53,7 @@ nasdaq_data = get_stock_data(nasdaq_tickers)
 
 # Check if data is empty before proceeding
 if nasdaq_data.empty:
-    st.error("No stock data available. Please try again later.")
+    st.error("No stock data available. Please try again later. This could be due to Yahoo Finance restrictions.")
 else:
     # Ensure "Direction" column exists before using it
     if "Direction" in nasdaq_data.columns:
