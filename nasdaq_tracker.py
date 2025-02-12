@@ -41,10 +41,11 @@ def get_stock_data(tickers):
 # Streamlit UI
 st.title("NASDAQ Stock Tracker")
 
-# Auto-refresh every 30 seconds
-st.write("Refreshing data every 30 seconds...")
-st.experimental_rerun()
-st.session_state.last_run = time.time()
+# Auto-refresh logic
+refresh_time = 30  # Refresh every 30 seconds
+if "last_refresh" not in st.session_state or time.time() - st.session_state.last_refresh > refresh_time:
+    st.session_state.last_refresh = time.time()
+    st.rerun()
 
 # Fetch stock data
 nasdaq_data = get_stock_data(nasdaq_tickers)
@@ -82,7 +83,3 @@ else:
         st.dataframe(sorted_data)
     else:
         st.error("Data error: 'Direction' column is missing.")
-
-# Refresh data every 30 seconds
-st.experimental_rerun()
-time.sleep(30)
